@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, useRef, ReactNode } from 'react';
 import { X, Minus, Square, Maximize2 } from 'lucide-react';
 
 interface WindowProps {
   id: string;
+  instanceId: string;
   title: string;
   icon: React.ElementType;
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface WindowProps {
   zIndex: number;
   position: { x: number; y: number };
   size: { width: number; height: number };
+  isActive: boolean;
   onClose: () => void;
   onMinimize: () => void;
   onMaximize: () => void;
@@ -21,13 +23,12 @@ interface WindowProps {
 }
 
 export const Window: React.FC<WindowProps> = ({
-  id, title, icon: Icon, isOpen, isMinimized, isMaximized, zIndex, position, size,
+  id, instanceId, title, icon: Icon, isOpen, isMinimized, isMaximized, zIndex, position, size, isActive,
   onClose, onMinimize, onMaximize, onFocus, onMove, onResize, children
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const windowRef = useRef<HTMLDivElement>(null);
-
+  
   // Drag Logic
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isMaximized) return;
@@ -44,7 +45,10 @@ export const Window: React.FC<WindowProps> = ({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        onMove(e.clientX - dragOffset.x, e.clientY - dragOffset.y);
+        // Basic boundary check
+        const newX = e.clientX - dragOffset.x;
+        const newY = e.clientY - dragOffset.y;
+        onMove(newX, newY);
       }
     };
 
@@ -65,54 +69,61 @@ export const Window: React.FC<WindowProps> = ({
 
   if (!isOpen) return null;
 
-  const currentStyle = isMaximized
-    ? { top: 32, left: 64, width: 'calc(100vw - 64px)', height: 'calc(100vh - 32px)', transform: 'none' } // Adjust for dock/topbar
+  const style: React.CSSProperties = isMaximized
+    ? { top: 0, left: 70, width: 'calc(100vw - 70px)', height: '100vh', transform: 'none', borderRadius: 0 }
     : { top: position.y, left: position.x, width: size.width, height: size.height };
 
   return (
     <div
-      ref={windowRef}
-      className={`absolute flex flex-col bg-[#333333] rounded-lg shadow-2xl border border-gray-700 overflow-hidden transition-opacity duration-200 ${isMinimized ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+      className={`absolute flex flex-col bg-[#333] shadow-2xl border border-black/20 overflow-hidden window-enter
+        ${isMinimized ? 'opacity-0 pointer-events-none scale-75 transition-all duration-300 ease-in-out origin-bottom-left' : 'opacity-100'}
+        ${!isMaximized ? 'rounded-xl' : ''}
+      `}
       style={{
-        ...currentStyle,
+        ...style,
         zIndex,
-        transition: isDragging ? 'none' : 'width 0.2s, height 0.2s, top 0.2s, left 0.2s',
-        display: isMinimized ? 'none' : 'flex'
+        transition: isDragging ? 'none' : 'all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1)',
+        display: isMinimized ? 'none' : 'flex',
+        boxShadow: isActive ? '0 25px 50px -12px rgba(0, 0, 0, 0.5)' : '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
       }}
       onMouseDown={onFocus}
     >
       {/* Title Bar */}
       <div
-        className="h-9 bg-[#2c2c2c] border-b border-gray-800 flex items-center justify-between px-3 select-none cursor-default"
+        className={`h-10 flex items-center justify-between px-3 select-none
+          ${isActive ? 'bg-[#2c2c2c]' : 'bg-[#252525]'}
+          border-b border-black/30
+        `}
         onMouseDown={handleMouseDown}
         onDoubleClick={onMaximize}
       >
-        <div className="flex items-center space-x-2 text-gray-300 text-sm font-medium">
-          <Icon size={16} className="text-ubuntu-orange" />
-          <span>{title}</span>
-        </div>
-        <div className="window-controls flex items-center space-x-2">
-          <button onClick={(e) => { e.stopPropagation(); onMinimize(); }} className="p-1 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">
-            <Minus size={14} />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); onMaximize(); }} className="p-1 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">
-            {isMaximized ? <MinimizeIcon /> : <Square size={12} />}
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="p-1 hover:bg-red-500 rounded-full text-gray-400 hover:text-white transition-colors group">
-            <X size={14} />
-          </button>
+        <div className="flex items-center space-x-3">
+           <div className="window-controls flex items-center space-x-2">
+            <button onClick={(e) => { e.stopPropagation(); onClose(); }} className="w-5 h-5 rounded-full bg-[#E95420] hover:bg-[#D84315] flex items-center justify-center text-transparent hover:text-white transition-colors shadow-sm">
+              <X size={12} />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onMinimize(); }} className="w-5 h-5 rounded-full bg-[#77216F] hover:bg-[#5E1A57] flex items-center justify-center text-transparent hover:text-white transition-colors shadow-sm">
+              <Minus size={12} />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onMaximize(); }} className="w-5 h-5 rounded-full bg-[#AEA79F] hover:bg-[#969089] flex items-center justify-center text-transparent hover:text-white transition-colors shadow-sm">
+              {isMaximized ? <MinimizeIcon /> : <Square size={10} />}
+            </button>
+          </div>
+          <span className={`text-sm font-medium transition-opacity ${isActive ? 'text-gray-200' : 'text-gray-500'}`}>
+             {title}
+          </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden relative bg-[#1E1E1E]">
+      <div className="flex-1 overflow-hidden relative bg-[#1E1E1E] flex flex-col">
         {children}
       </div>
       
-      {/* Resize Handle (Simple corner) */}
+      {/* Resize Handle */}
       {!isMaximized && (
         <div 
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-50"
+          className="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize z-50 flex items-end justify-end p-1"
           onMouseDown={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -124,7 +135,7 @@ export const Window: React.FC<WindowProps> = ({
 
             const handleResizeMove = (moveEvent: MouseEvent) => {
               onResize(
-                Math.max(300, startWidth + (moveEvent.clientX - startX)),
+                Math.max(320, startWidth + (moveEvent.clientX - startX)),
                 Math.max(200, startHeight + (moveEvent.clientY - startY))
               );
             };
@@ -137,14 +148,15 @@ export const Window: React.FC<WindowProps> = ({
             window.addEventListener('mousemove', handleResizeMove);
             window.addEventListener('mouseup', handleResizeUp);
           }}
-        />
+        >
+        </div>
       )}
     </div>
   );
 };
 
 const MinimizeIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
   </svg>
 );

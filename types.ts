@@ -9,10 +9,12 @@ export enum AppID {
   VSCODE = 'vscode',
   AI_CHAT = 'ai_chat',
   ABOUT = 'about',
+  TRASH = 'trash'
 }
 
 export interface WindowState {
   id: AppID;
+  instanceId: string;
   title: string;
   isOpen: boolean;
   isMinimized: boolean;
@@ -22,16 +24,23 @@ export interface WindowState {
   zIndex: number;
   component: ReactNode;
   icon: any; 
+  data?: any; // For passing initial file path etc.
 }
 
 export interface FileSystemItem {
+  id: string;
   name: string;
   type: 'file' | 'folder';
-  content?: string;
-  children?: FileSystemItem[];
+  content?: string; // For files
+  parentId: string | null;
+  createdAt: number;
 }
 
-export interface Theme {
-  background: string;
-  mode: 'dark' | 'light';
+export interface ContextMenuItem {
+  label?: string;
+  action?: () => void;
+  icon?: any;
+  shortcut?: string;
+  divider?: boolean;
+  disabled?: boolean;
 }
