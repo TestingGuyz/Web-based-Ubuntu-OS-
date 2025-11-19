@@ -1,0 +1,7 @@
+{
+  "name": "Ubuntu WebOS",
+  "description": "A fully functional, browser-based Linux desktop environment simulation featuring a window manager, terminal with AI integration, and responsive Ubuntu-style UI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

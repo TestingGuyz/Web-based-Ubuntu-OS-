@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Ubuntu WebOS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Ubuntu', 'sans-serif'],
+              mono: ['Ubuntu Mono', 'monospace'],
+            },
+            colors: {
+              ubuntu: {
+                orange: '#E95420',
+                dark: '#2C001E',
+                purple: '#77216F',
+                warm: '#AEA79F',
+                cool: '#333333'
+              }
+            },
+            cursor: {
+              'default': 'url(https://ubuntu.com/static/asset/f5e6d063-cursor-default.png), auto',
+              'pointer': 'url(https://ubuntu.com/static/asset/f5e6d063-cursor-pointer.png), pointer',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        overflow: hidden;
+        background-color: #000;
+      }
+      /* Custom scrollbar for terminal and windows */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.4);
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
